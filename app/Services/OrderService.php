@@ -14,8 +14,10 @@ class OrderService
 {
     public function create(CreateOrderDto $dto): Order
     {
-        $order = $dto->toModel();
-        $order->save();
+        $data=array_merge($dto->toArray(),[
+            'price'=>
+        ]);
+        $order= Order::query()->create($data);
 
         return $order;
     }

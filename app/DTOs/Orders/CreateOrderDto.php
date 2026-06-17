@@ -1,46 +1,37 @@
 <?php
 namespace App\DTOs\Orders;
+use App\Models\Order;
 use InvalidArgumentException;
 
 class CreateOrderDto
 {
     public function __construct(
-        public ?string $number = null,
-        public float $total,
-        public string $currency,
-        public string $status = 'pending',
         public ?string $notes = null,
-        public int $userId,
-        public int $orderAddressId
+        public int $orderAddressId,
+        public array $items,
     ) {}
 
     public static function fromRequest(array $data): self
     {
-        if (!isset($data['total'], $data['currency'], $data['user_id'], $data['order_address_id'])) {
+        if (!isset( $data['order_address_id'])) {
             throw new InvalidArgumentException('Required fields are missing: total, currency, user_id, order_address_id.');
         }
 
         return new self(
-            number: $data['number'] ?? null,
-            total: (float) $data['total'],
-            currency: strtoupper((string) $data['currency']),
-            status: $data['status'] ?? 'pending',
             notes: $data['notes'] ?? null,
-            userId: (int) $data['user_id'],
-            orderAddressId: (int) $data['order_address_id']
+            orderAddressId: (int) $data['order_address_id'],
+            items: $data['items'] ?? null,
         );
     }
-
-    public function toModel(): \App\Models\Order
+    public function toArray(): array
     {
-        return new \App\Models\Order([
-            'number' => $this->number,
-            'total' => $this->total,
-            'currency' => $this->currency,
-            'status' => $this->status,
+        return [
             'notes' => $this->notes,
-            'user_id' => $this->userId,
-            'order_address_id' => $this->orderAddressId,
-        ]);
+            'orderAddressId' => $this->orderAddressId,
+            'items' => $this->items,
+            'number'=>time(),
+            'user_id'=>auth()->id(),
+            'currency'=>'EGP',
+        ];
     }
 }

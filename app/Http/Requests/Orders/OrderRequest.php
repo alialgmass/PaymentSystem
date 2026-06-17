@@ -25,28 +25,22 @@ class OrderRequest extends FormRequest
         $orderId = $this->route('order');
 
         $commonRules = [
-            'status' => 'sometimes|string|in:pending,processing,paid,cancelled,refunded',
-            'currency' => 'sometimes|string|size:3',
             'notes' => 'sometimes|nullable|string',
-            'user_id' => ['sometimes', 'nullable', 'exists:users,id'],
             'order_address_id' => ['sometimes', 'nullable', 'exists:order_addresses,id'],
         ];
 
         if ($this->isMethod('post')) {
             return [
                 ...$commonRules,
-                'number' => 'sometimes|nullable|string|max:255|unique:orders,number',
-                'total' => 'required|numeric|min:0',
-                'currency' => 'required|string|size:3',
-                'user_id' => ['required', 'exists:users,id'],
                 'order_address_id' => ['required', 'exists:order_addresses,id'],
+                'items' => ['required', 'nullable', 'array'],
+                'items.*.id' => 'sometimes|exists:products,id',
+                'items.*.quantity' => 'sometimes|required|integer|min:1',
             ];
         }
 
         return [
             ...$commonRules,
-            'number' => ['sometimes', 'nullable', 'string', 'max:255', 'unique:orders,number,' . $orderId],
-            'total' => ['sometimes', 'nullable', 'numeric', 'min:0'],
         ];
     }
 
