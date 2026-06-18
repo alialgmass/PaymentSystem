@@ -27,4 +27,8 @@ readonly class Money
             $this->currency
         );
     }
+    public function getAmount(): float
+    {
+        return $this->amount;
+    }
 }

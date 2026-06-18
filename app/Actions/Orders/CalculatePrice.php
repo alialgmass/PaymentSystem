@@ -2,22 +2,25 @@
 
 namespace App\Actions\Orders;
 
-use App\Models\Product;
+use App\Contracts\Repositories\ProductRepositoryInterface;
+use App\DTOs\Orders\OrderItemDto;
 use App\ValueObjects\OrderTotalValue;
 
 class CalculatePrice
 {
-    public function calculate(array $items): OrderTotalValue
+    public function __construct(
+        private readonly ProductRepositoryInterface $productRepository,
+    ) {}
+
+    public function __invoke(OrderItemDto ...$items): OrderTotalValue
     {
         $price = 0;
-        foreach ($items as $item) {
-            $price += $this->getProductPrice($item['id']) * $item['quantity'];
-        }
-        return OrderTotalValue::create($price);
-    }
 
-    private function getProductPrice($id):float
-    {
-        return Product::query()->findOrFail($id)->price;
+        foreach ($items as $item) {
+            $productPrice = $this->productRepository->findPrice($item->productId);
+            $price += $productPrice * $item->quantity;
+        }
+
+        return OrderTotalValue::create((int) round($price));
     }
 }
